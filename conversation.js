@@ -12,6 +12,7 @@ import TJBot from 'tjbot';
 import config from './config.js';
 import 'dotenv/config.js'
 import { exec } from 'child_process';
+
 import { Configuration, OpenAIApi } from 'openai';
 
 const configuration = new Configuration({
@@ -21,6 +22,7 @@ const openai = new OpenAIApi(configuration);
 
 // these are the hardware capabilities that TJ needs for this recipe
 const hardware = [TJBot.HARDWARE.MICROPHONE, TJBot.HARDWARE.SPEAKER, TJBot.HARDWARE.SERVO];
+
 if (config.hasCamera) {
     hardware.push(TJBot.HARDWARE.CAMERA);
 }
@@ -35,7 +37,6 @@ const tjConfig = {
     log: {
         level: 'silly', // change to 'verbose' or 'silly' for more detail about what TJBot is doing
     },
-
    listen: {
     microphoneDeviceId: 'plughw:CARD=Device,DEV=0',
 },
