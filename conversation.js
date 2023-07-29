@@ -11,6 +11,7 @@
 import TJBot from 'tjbot';
 import config from './config.js';
 import 'dotenv/config.js'
+import { exec } from 'child_process';
 
 import { Configuration, OpenAIApi } from 'openai';
 
@@ -20,7 +21,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 // these are the hardware capabilities that TJ needs for this recipe
-const hardware = [TJBot.HARDWARE.MICROPHONE, TJBot.HARDWARE.SPEAKER, TJBot.HARDWARE.LED_NEOPIXEL, TJBot.HARDWARE.SERVO];
+const hardware = [TJBot.HARDWARE.MICROPHONE, TJBot.HARDWARE.SPEAKER, TJBot.HARDWARE.SERVO];
+
 if (config.hasCamera) {
     hardware.push(TJBot.HARDWARE.CAMERA);
 }
@@ -34,11 +36,6 @@ const tjConfig = {
     verboseLogging: true,
     log: {
         level: 'silly', // change to 'verbose' or 'silly' for more detail about what TJBot is doing
-    },
-    converse: {
-        assistantId: config.assistantId,
-        microphoneDeviceId: 'plughw:CARD=Device,DEV=0',
-
     },
    listen: {
     microphoneDeviceId: 'plughw:CARD=Device,DEV=0',
@@ -79,11 +76,10 @@ console.log("Say 'stop' or press ctrl-c to exit this recipe.");
 // listen for utterances with our attentionWord and send the result to
 // the Assistant service
 //tj.speak('I am Pieter. My favorite color is blue. I am 30 days old. I wish T J Bot had better documentation.');
-tj.shine('000000');
+exec('sudo python /home/plaughed/improvedtjbot/control_neopixel.py ' + 'purple');
+
 tj.speak('Sonja is amazing');
 tj.wave();
-
-tj.shine('0x006600');
 
 while (true) {
     const msg = await tj.listen();
