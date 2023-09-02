@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "dotenv": "^6.2.0",
+        "ibm-watson": "^5.7.3",
         "openai": "^3.3.0",
         "tjbot": "^2.0.1"
     }
