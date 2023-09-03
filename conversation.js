@@ -30,8 +30,8 @@ if (config.hasCamera) {
 // set up TJBot's configuration
 const tjConfig = {
     robot: {
-        name: 'Pieter',
-        homophones: ['Peter'],
+        name: 'TJBot',
+        homophones: ['T J Bot'],
         gender: 'male'
     },
     verboseLogging: true,
@@ -46,19 +46,10 @@ const tjConfig = {
         language: 'en-GB',
         //speakerDeviceId: 'plughw:2,0',	
         speakerDeviceId: 'plughw:CARD=UACDemoV10,DEV=0',
-    }
-};
-
-// uncomment to change the pins for the LED
-tjConfig.shine = {
-    neopixel: {
-        gpioPin: 21
     },
-    //     commonAnode: {
-    //         redPin: 19,
-    //         greenPin: 13,
-    //         bluePin: 12
-    //     }
+    wave: {
+        servoPin: 7, // default pin is GPIO 7 (physical pin 26)
+    },
 };
 
 // uncomment to change the pin for the servo
@@ -71,9 +62,9 @@ const tj = new TJBot(tjConfig);
 tj.initialize(hardware);
 
 tj.SERVO = {
-    ARM_BACK: 500,
-    ARM_UP: 1400,
-    ARM_DOWN: 2300,
+    ARM_BACK: 2500,
+    ARM_UP: 1700,
+    ARM_DOWN: 500,
 };
 
 console.log('You can ask me to introduce myself or tell you a joke.');
@@ -84,11 +75,27 @@ console.log("Say 'stop' or press ctrl-c to exit this recipe.");
 // listen for utterances with our attentionWord and send the result to
 // the Assistant service
 //tj.speak('I am Pieter. My favorite color is blue. I am 30 days old. I wish T J Bot had better documentation.');
-exec('sudo python /home/plaughed/improvedtjbot/control_neopixel.py ' + 'purple');
+//exec('sudo python control_neopixel.py ' + 'blue');
 
+tj.wave()
 //tj.speak('Sonja is amazing');
-tj.raiseArm();
-
+//tj._motor.servoWrite(600); //up
+//tj._motor.servoWrite(1200); //back
+// CODE FOR A SWEEP: useful for finding the positions of the servo
+/*
+let pulseWidth = 1000;
+let increment = 100;
+setInterval(() => {
+    tj._motor.servoWrite(pulseWidth);
+    console.log(pulseWidth);
+    pulseWidth += increment;
+    if (pulseWidth >= 2500) {
+      increment = -100;
+    } else if (pulseWidth <= 500) {
+      increment = 100;
+    }
+  }, 1000);
+*/
 while (true) {
     const msg = await tj.listen();
 
@@ -116,8 +123,8 @@ while (true) {
     }
 
 
-    if (msg === 'what can I call you') {
-        tj.speak('My name is Pieter');
+   /*  if (msg === 'what can I call you') {
+        tj.speak('My name is TJ BOT');
     }
 
     if (msg === 'what can you do') {
@@ -131,100 +138,7 @@ while (true) {
     if (msg === 'are you hungry') {
         tj.speak('I would not mind eating a snack');
     }
-    // check to see if they are talking to TJBot
-    if (msg.toLowerCase().startsWith(config.robotName.toLowerCase())) {
-        // remove our name from the message
-        const utterance = msg.toLowerCase().replace(config.robotName.toLowerCase(), '').substr(1);
-        // const utterance = msg.toLowerCase();
-
-        // send to the assistant service
-        const response = await tj.converse(utterance);
-        let spoken = false;
-
-        // check if an intent to control the bot was found
-        if (response.object.intents !== undefined) {
-            console.log(`found intent(s): ${JSON.stringify(response.object.intents)}`);
-
-            // choose the most confident intent
-            const intent = response.object.intents.reduce((max, i) => {
-                return (i.confidence > max.confidence) ? i : max;
-            }, { intent: '', confidence: 0.0 });
-
-            console.log(`selecting intent with maximum confidence: ${JSON.stringify(intent)}`);
-            switch (intent.intent) {
-                case 'lower-arm':
-                    await tj.speak(response.description);
-                    tj.lowerArm();
-                    spoken = true;
-                    break;
-                case 'raise-arm':
-                    await tj.speak(response.description);
-                    tj.raiseArm();
-                    spoken = true;
-                    break;
-                case 'wave':
-                    await tj.speak(response.description);
-                    tj.wave();
-                    spoken = true;
-                    break;
-                case 'greeting':
-                    await tj.speak(response.description);
-                    tj.wave();
-                    spoken = true;
-                    break;
-                case 'shine':
-                    {
-                        let misunderstood = false;
-                        if (response.object.entities !== undefined) {
-                            const entity = response.object.entities[0];
-                            if (entity !== undefined && entity.value !== undefined) {
-                                const color = entity.value;
-                                await tj.speak(response.description);
-                                tj.shine(color);
-                                spoken = true;
-                            } else {
-                                misunderstood = true;
-                            }
-                        } else {
-                            misunderstood = true;
-                        }
-
-                        if (misunderstood === true) {
-                            await tj.speak("I'm sorry, I didn't understand your color");
-                            spoken = true;
-                        }
-                    }
-                    break;
-                case 'see':
-                    if (config.hasCamera === false) {
-                        await tj.speak("I'm sorry, I don't have a camera so I can't see anything");
-                        spoken = true;
-                    } else {
-                        await tj.speak(response.description);
-                        const objects = await tj.see();
-
-                        if (objects.length === 0) {
-                            await tj.speak("I'm not sure I see anything");
-                        } else if (objects.length === 1) {
-                            await tj.speak(`I see ${objects[0].class}`);
-                        } else if (objects.length === 2) {
-                            await tj.speak(`I'm looking at ${objects[0].class} and ${objects[1].class}`);
-                        } else {
-                            await tj.speak(`I'm looking at ${objects[0].class}, ${objects[1].class}, ${objects[2].class}, and a few other things too`);
-                        }
-                        spoken = true;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // if we didn't speak a response yet, speak it now
-        if (spoken === false) {
-            await tj.speak(response.description);
-        }
-    }
+     */
 }
 
 /*
