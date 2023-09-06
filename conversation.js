@@ -12,6 +12,7 @@ import TJBot from 'tjbot';
 import config from './config.js';
 import 'dotenv/config.js'
 import { exec } from 'child_process';
+import { fs } from 'fs';
 
 import { Configuration, OpenAIApi } from 'openai';
 
@@ -67,6 +68,8 @@ tj.SERVO = {
     ARM_DOWN: 500,
 };
 
+const USE_GPT = false;
+
 console.log('You can ask me to introduce myself or tell you a joke.');
 console.log(`Try saying, "${config.robotName}, please introduce yourself" or "${config.robotName}, what can you do?"`);
 console.log(`You can also say, "${config.robotName}, tell me a joke!"`);
@@ -96,17 +99,32 @@ setInterval(() => {
     }
   }, 1000);
 */
+
 while (true) {
     const msg = await tj.listen();
 
-    const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        messages: [{ "role": "system", "content": "You are a helpful robot called TJBot. You can lower and raise an arm. You get input from a STT system, so please do error correction. If you want to lower your arm, start your message by '%LOWER', if you want to raise it start with '%RAISE'. You can wave by starting with '%WAVE'." }, { role: "user", content: msg }],
-    });
+    if (USE_GPT) {
+        const completion = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: [{ "role": "system", "content": "You are a helpful robot called TJBot. You can lower and raise an arm. You get input from a STT system, so please do error correction. If you want to lower your arm, start your message by '%LOWER', if you want to raise it start with '%RAISE'. You can wave by starting with '%WAVE'." }, { role: "user", content: msg }],
+        });
 
-    tj.speak(completion.data.choices[0].message['content'].replace("%LOWER", "").replace("%RAISE", "").replace("%WAVE", ""));
+        tj.speak(completion.data.choices[0].message['content'].replace("%LOWER", "").replace("%RAISE", "").replace("%WAVE", ""));
 
+    } else {
 
+        fs.readFile('./responses.json', 'utf8', (err, data) => {
+            if (err) {
+                console.log(`Error reading file from disk: ${err}`)
+            } else {
+                // parse JSON string to JSON object
+                const responses = JSON.parse(data)
+
+                console.log(responses['hi'].response);
+                tj.speak(responses['hi'].response);
+            }
+        });
+    }
     if (msg === 'stop') {
         console.log('Goodbye!');
         process.exit(0);
@@ -123,22 +141,22 @@ while (true) {
     }
 
 
-   /*  if (msg === 'what can I call you') {
-        tj.speak('My name is TJ BOT');
-    }
-
-    if (msg === 'what can you do') {
-        tj.speak('I can wave to you and I can talk to you.');
-    }
-
-    if (msg === 'what is your favorite color') {
-        tj.speak('My favorite color is blue');
-    }
-
-    if (msg === 'are you hungry') {
-        tj.speak('I would not mind eating a snack');
-    }
-     */
+    /*  if (msg === 'what can I call you') {
+         tj.speak('My name is TJ BOT');
+     }
+ 
+     if (msg === 'what can you do') {
+         tj.speak('I can wave to you and I can talk to you.');
+     }
+ 
+     if (msg === 'what is your favorite color') {
+         tj.speak('My favorite color is blue');
+     }
+ 
+     if (msg === 'are you hungry') {
+         tj.speak('I would not mind eating a snack');
+     }
+      */
 }
 
 /*
