@@ -1,0 +1,8 @@
+{
+    "hi": {
+        "response": "Hi back."
+    },
+    "bye": {
+        "response": "See you later."
+    }
+}
