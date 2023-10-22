@@ -1,8 +1,12 @@
 {
-    "hi": {
-        "response": "Hi back."
+    "hello": {
+        "response": "Hello back."
     },
-    "bye": {
+    "Hey nice LED": {
+        "response": "Thanks, it can also glow red.",
+        "color": "red"
+    },
+    "bye bye": {
         "response": "See you later."
     }
 }

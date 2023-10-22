@@ -10,14 +10,17 @@
 
 import TJBot from 'tjbot';
 import config from './config.js';
-import 'dotenv/config.js'
+import { parse } from 'dotenv';
 import { exec } from 'child_process';
-import { fs } from 'fs';
+import { readFile, readFileSync } from 'node:fs';
 
 import { Configuration, OpenAIApi } from 'openai';
 
+const data = readFileSync('openai-credentials.env', 'utf8');
+const openaiconfig = parse(data)
+
 const configuration = new Configuration({
-    apiKey: process.env.OPENAI_KEY,
+    apiKey: config.OPENAI_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
@@ -77,11 +80,8 @@ console.log("Say 'stop' or press ctrl-c to exit this recipe.");
 
 // listen for utterances with our attentionWord and send the result to
 // the Assistant service
-//tj.speak('I am Pieter. My favorite color is blue. I am 30 days old. I wish T J Bot had better documentation.');
 //exec('sudo python control_neopixel.py ' + 'blue');
-
 tj.wave()
-//tj.speak('Sonja is amazing');
 //tj._motor.servoWrite(600); //up
 //tj._motor.servoWrite(1200); //back
 // CODE FOR A SWEEP: useful for finding the positions of the servo
@@ -110,18 +110,30 @@ while (true) {
         });
 
         tj.speak(completion.data.choices[0].message['content'].replace("%LOWER", "").replace("%RAISE", "").replace("%WAVE", ""));
-
+        
+        if (completion.data.choices[0].message['content'].includes('%LOWER')) {
+            tj.lowerArm();
+        }
+        else if (completion.data.choices[0].message['content'].includes('%RAISE')) {
+            tj.raiseArm();
+        }
+        else if (completion.data.choices[0].message['content'].includes('%WAVE')) {
+            tj.wave();
+        }
+    
     } else {
 
-        fs.readFile('./responses.json', 'utf8', (err, data) => {
+        readFile('./responses.json', 'utf8', (err, data) => {
             if (err) {
                 console.log(`Error reading file from disk: ${err}`)
             } else {
                 // parse JSON string to JSON object
                 const responses = JSON.parse(data)
-
-                console.log(responses['hi'].response);
-                tj.speak(responses['hi'].response);
+                if (msg in responses) {
+                    tj.speak(responses[msg].response);
+                } else {
+                    tj.speak("I didn't understand you, could you try again?")
+                }
             }
         });
     }
@@ -129,17 +141,6 @@ while (true) {
         console.log('Goodbye!');
         process.exit(0);
     }
-
-    if (completion.data.choices[0].message['content'].includes('%LOWER')) {
-        tj.lowerArm();
-    }
-    else if (completion.data.choices[0].message['content'].includes('%RAISE')) {
-        tj.raiseArm();
-    }
-    else if (completion.data.choices[0].message['content'].includes('%WAVE')) {
-        tj.wave();
-    }
-
 
     /*  if (msg === 'what can I call you') {
          tj.speak('My name is TJ BOT');
