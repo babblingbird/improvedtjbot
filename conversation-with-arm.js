@@ -16,6 +16,8 @@ import { readFile, readFileSync } from 'node:fs';
 
 import { Configuration, OpenAIApi } from 'openai';
 
+const prompt = readFileSync('tjbot.prompt', 'utf8');
+
 const data = readFileSync('openai-credentials.env', 'utf8');
 const openaiconfig = parse(data)
 
@@ -106,7 +108,7 @@ while (true) {
     if (USE_GPT) {
         const completion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
-            messages: [{ "role": "system", "content": "You are a helpful robot called TJBot. You can lower and raise an arm. You get input from a STT system, so please do error correction. If you want to lower your arm, start your message by '%LOWER', if you want to raise it start with '%RAISE'. You can wave by starting with '%WAVE'." }, { role: "user", content: msg }],
+            messages: [{ "role": "system", "content": prompt }, { role: "user", content: msg }],
         });
 
         tj.speak(completion.data.choices[0].message['content'].replace("%LOWER", "").replace("%RAISE", "").replace("%WAVE", ""));
