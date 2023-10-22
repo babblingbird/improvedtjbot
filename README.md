@@ -13,10 +13,20 @@
 ## Features
 
 ## Differences with the original TJBot
-- Conversational AI instead of Watson's AI.
+- Conversational AI using (i) OpenAI instead of Watson's AI or (ii) a text-based file with responses.
 - LED has a diode to reduce $V_{cc}$ voltage.
+- Code has been cleaned up and pin numbers are changed.
+
+
 
 ## Setup
+If you want to configure a new TJBot, you can use the `setup.sh` file in the repo. The following commands should be enough on a rpi with internet (see the following sections for connecting to internet):
+
+```
+git clone https://github.com/babblingbird/improvedtjbot
+cd improvedtjbot
+bash setup.sh
+```
 
 ### Network
 TJBot needs access to the internet for understanding and responding (STT and TTS systems), as well as for the conversations (GPT-3). There are a few options to give TJBot access, depending on what is most conventient.
@@ -35,9 +45,7 @@ TJBot needs access to the internet for understanding and responding (STT and TTS
 
 3. **File-based setup**
 
-    This approach requires an sd card reader.
-
-    Before booting TJBot, create a file on the sd card at the disk root named `TODO` that contains the wifi credentials. More info on this method can be found [here]().
+    This approach requires an sd card reader. More info on this method can be found [here](https://raspberrypi.stackexchange.com/questions/10251/prepare-sd-card-for-wifi-on-headless-pi#57023).
 
 ### Connecting to TJBot
 When using the TJBot without screen (headless mode), you can connect to it remotely using ssh. This way you can still edit the prompt and config files. 
@@ -57,10 +65,10 @@ When using the TJBot without screen (headless mode), you can connect to it remot
 
 1. **Speaker and/or microphone doesn't work**. 
   
-    _Reason_: The Raspberry selects random id's for the audio devices on boot. These can be checked with `arecord --list` and `aplay --list`, but are hardcoded in the TJBot's source code.
+    _Reason_: The Raspberry selects random id's for the audio devices on boot. These should have been hardcoded using the identifiers, but might not work with different devices (e.g. a different speaker). The names can be checked with `arecord --list` and `aplay --list`, but are hardcoded in the TJBot's source code.
 
     _Fix_: Reboot the Raspberry Pi. If this issue persists, check the id's using the above commands.
 
 2. **I can't ssh to TJBot**.
 
-    Check if the username (`tjbot`) and password (`root`) you provided is correct.
+    Check if the username (`tjbot`) and password (`root`) you provided is correct. You also need to enable SSH in the Raspberry Pi Settings. 
